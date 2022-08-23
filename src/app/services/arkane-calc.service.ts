@@ -1,11 +1,37 @@
 import { Injectable } from '@angular/core';
+import { ArkaneREService } from './arkane-re.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ArkaneCalcService {
 
-  constructor() { }
+  constructor(private akre:ArkaneREService) { }
+
+  //lambda equivalent is about 0.000126 cents per hour at O(n)
+ getInvocationCost(memoryAlloc,procEstimate,timeEstimate){
+
+  let baseRate = 0.000126;
+
+  let memoryCost = memoryAlloc * baseRate;
+  let procCost = procEstimate * baseRate;
+  let timeCost = timeEstimate * baseRate;
+  let totalCost = memoryCost + procCost + timeCost;
+  return (totalCost/3)/3600;
+
+ }
+ 
+  getSusCodeRank(payload:string) {
+   
+    let rank = payload.match(this.akre.sussRegex);
+    if (rank) {
+      return rank.length;
+    } else {
+      return 0;
+    }
+
+  }
+
 
 
   //a function to calculate the byte size of a string
@@ -54,8 +80,6 @@ export class ArkaneCalcService {
 
   //calculate gas fees for the execution of one payload
   getGasFees(payload:string) {
-    let byteSize = this.getStringByteSize(payload);
-    let gasFees = Math.floor(byteSize / 1024);
 
     let procLoad = this.getBigONotation(payload);
 
